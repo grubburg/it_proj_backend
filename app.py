@@ -1,10 +1,13 @@
 from flask import Flask
+import os
 
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 
 # Use a service account
+GCScert = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+
 cred = credentials.Certificate('./it-proj-backend-250602-58ddd0292162.json')
 firebase_admin.initialize_app(cred)
 
