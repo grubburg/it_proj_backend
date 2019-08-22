@@ -60,4 +60,5 @@ target/
 # Other
 
 *.json
+objectify/
 
