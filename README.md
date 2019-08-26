@@ -10,4 +10,4 @@ object storage platform API
 - create your virtual environment. I created one called `objectify` but you can use any name, just make sure that if you create the environment within the git repo, to add it to the .gitignore.
 - run the venv with `source <venv name>/bin/activate`
 - run `pip install -r requirements.txt` to install flask and other dependencies
-- Youre good to go!
+- Now you can run the app with `gunicorn app:app`
