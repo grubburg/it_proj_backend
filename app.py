@@ -22,10 +22,21 @@ def hello_world():
 
 
 @app.route('/items/add', methods = ['POST'])
-def postJsonHandler():
-    data = request.get_json()
+def addItem():
+	data = request.get_json()
 	db.collection(u'items').add(data)
-    return str(data)
+	return str(data)
+
+@app.route('/items/')
+def getAllItems():
+	items = db.collection(u'items').stream()
+	itemstr = ''
+	for item in items:
+		
+		itemstr += str(item.to_dict()) + '\n'
+	return itemstr
+
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
