@@ -30,7 +30,8 @@ app = Flask(__name__)
 
 def getI420FromBase64(codec):
     """ Convert image from a base64 bytes stream to an image. """
-    base64_data = re.sub(b'^data:image/.+;base64,', b'', codec)
+    base64_data = codec['image']
+    print(base64_data)
     byte_data = base64.b64decode(base64_data)
     image_data = BytesIO(byte_data)
     img = Image.open(image_data)
@@ -93,7 +94,7 @@ def detection():
     request.get_data()
 
     # Load in an image to object detect and preprocess it
-    img_data = getI420FromBase64(request.data)
+    img_data = getI420FromBase64(request.get_json())
     x_input = np.expand_dims(img_data, axis=0)  # add an extra dimention.
 
     # Setting initial detection time, so execution time can be calculated.
@@ -128,8 +129,8 @@ def detection():
         new_item = {}
         if scores[i] > threshold:
             prediction_label = str(predict_list[i])
-            obj_name = menu['item'][prediction_label]
-            obj_price = menu['price'][prediction_label]
+            obj_name = prediction_label
+            obj_price = prediction_label
 
             new_item = {'id': randint(0, 100000),
                         'name': obj_name,
@@ -186,4 +187,4 @@ if __name__ == '__main__':
     detection_num_op = graph.get_operation_by_name('num_detections')
     detection_num = detection_num_op.outputs[0]
 
-    app.run(debug=False, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
