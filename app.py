@@ -39,7 +39,7 @@ menu = {1: {'id': 1, 'name': 'person'}, 2: {'id': 2, 'name': 'bicycle'}, 3: {'id
 def getI420FromBase64(b64in):
     """ Convert image from a base64 bytes stream to an image. """
     base64_data = b64in
-    print(base64_data)
+
     byte_data = base64.b64decode(base64_data)
     image_data = BytesIO(byte_data)
     img = Image.open(image_data)
@@ -102,7 +102,7 @@ def detection():
     data = request.get_json()
 
     datastring = data['image']
-    print(type(datastring))
+
     # Load in an image to object detect and preprocess it
     img_data = getI420FromBase64(datastring)
 
@@ -141,9 +141,6 @@ def detection():
 
             label.append(obj_name)
 
-    print("number and list of items that above the threshold")
-    print(len(label))
-    print(label)
     return label[0]
 
 
@@ -152,7 +149,7 @@ def detection():
 ##################################################
 
 
-if __name__ == '__main__':
+if __name__ != '__main__':
     print('Starting TensorFlow Server')
 
     print('Configuring TensorFlow Graph..')
@@ -194,4 +191,4 @@ if __name__ == '__main__':
     detection_num_op = graph.get_operation_by_name('num_detections')
     detection_num = detection_num_op.outputs[0]
 
-    app.run(debug=True, host='0.0.0.0')
+    # app.run(debug=True, host='0.0.0.0')
