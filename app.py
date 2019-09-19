@@ -18,6 +18,8 @@ import base64
 
 from random import randint
 
+IMAGE_MAX_SIZE = 256
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 MODEL_DETECT_PATH = dir_path + '/model/frozen_inference_graph.pb'
 
@@ -105,6 +107,19 @@ def detection():
 
     # Load in an image to object detect and preprocess it
     img_data = getI420FromBase64(datastring)
+    width,height = img_data.size
+    
+    width_ratio = width/IMAGE_MAX_SIZE
+    height_ratio = height/IMAGE_MAX_SIZE
+
+
+    ratio = max(width_ratio, height_ratio)
+
+    new_width = int(width/ratio)
+    new_height = int(height/ratio)
+
+    img_data = img_data.resize((new_width, new_height))
+    print(img_data.size)
 
     # img_data = Image.open(img_data)
 
