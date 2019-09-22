@@ -53,8 +53,8 @@ def signUp():
     return data
 
 
-@app.route('/login/')
-def login():
+# @app.route('/login/')
+# def login():
 
 
 if __name__ == '__main__':
