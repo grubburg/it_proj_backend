@@ -7,22 +7,34 @@ from firebase_admin import auth
 from firebase_admin import credentials
 from firebase_admin import firestore
 
-# Use a service account
-# GCScert = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
 
+# Load firebase credentials and authenticate firebase admin
+# ------------------------------------------------------------
 cred = credentials.Certificate(
     './it-proj-backend-firebase-adminsdk-pnizj-2ab146748a.json')
 firebase_admin.initialize_app(cred)
+# -------------------------------------------------------------
 
+# Create app and database objects
+# -------------------------------------------------------------
 db = firestore.client()
 app = Flask(__name__)
+# -------------------------------------------------------------
 
 
+################ ROUTES ###############
+"""
+Base route. TODO: replace with something meaniful 
+"""
 @app.route('/')
 def hello_world():
     return "compu-global-hyper-mega-net was here!"
 
 
+"""
+Add an item to the database. 
+TODO: add logic to add item to a users list of items.
+"""
 @app.route('/items/add', methods=['POST'])
 def addItem():
     data = request.get_json()
@@ -30,6 +42,10 @@ def addItem():
     return str(data)
 
 
+"""
+List all items in the database
+TODO: List only items for a given user. 
+"""
 @app.route('/items/')
 def getAllItems():
     items = db.collection(u'items').stream()
@@ -40,17 +56,22 @@ def getAllItems():
     return itemstr
 
 
+"""
+Create a new user in the database.
+Valid fireauth token must be provided. 
+"""
 @app.route('/signup/', methods=['POST'])
 def signUp():
     data = request.get_json()
 
-    username = data['username']
-    email = data['email']
-    token = data['token']
+    id_token = data['token']
 
-    db.collection(u'users').document(token).set(data)
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
 
-    return data
+    db.collection(u'users').document(uid).set(data)
+
+    return str(data)
 
 
 # @app.route('/login/')
