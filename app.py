@@ -40,5 +40,21 @@ def getAllItems():
     return itemstr
 
 
+@app.route('/signup/')
+def signUp():
+    data = request.get_json()
+
+    username = data['username']
+    email = data['email']
+    token = data['token']
+
+    db.collection(u'users').document(token).set(data)
+
+    return data
+
+
+# @app.route('/login/')
+# def login():
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
