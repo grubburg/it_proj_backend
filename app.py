@@ -40,7 +40,7 @@ def getAllItems():
     return itemstr
 
 
-@app.route('/signup/')
+@app.route('/signup/', methods=['POST'])
 def signUp():
     data = request.get_json()
 
@@ -53,8 +53,9 @@ def signUp():
     return data
 
 
-# @app.route('/login/')
-# def login():
+@app.route('/login/')
+def login():
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
