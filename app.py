@@ -1,4 +1,4 @@
-from flask import Flask, request
+
 from schemas import user
 import os
 
@@ -80,9 +80,22 @@ def signUp():
 
     return str(data)
 
+"""
+Send a fireauth token and retrieve a given users information.
+NOTE: This is not a session management function, it simply serves
+to supply the app with user information. 
+"""
+@app.route('/login/', methods=['POST'])
+def login():
+    # capture the request and recover use id
+    data = request.get_json()
+    id_token = data['token']
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+    # collect the user doc from the database
+    user_data = db.collection(u'users').document(uid).get()
 
-# @app.route('/login/')
-# def login():
+    return str(user_data.to_dict())
 
 
 if __name__ == '__main__':
