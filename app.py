@@ -1,5 +1,5 @@
 from flask import Flask, request
-
+from schemas import user
 import os
 
 import firebase_admin
@@ -64,12 +64,19 @@ Valid fireauth token must be provided.
 def signUp():
     data = request.get_json()
 
+    # retrieve and decode the users token
     id_token = data['token']
-
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
-
-    db.collection(u'users').document(uid).set(data)
+    
+    # ad an empty list of items to the user object
+    data['items'] = []
+    
+    # remove the token from the user object
+    del data['token']
+    user = User(data) 
+    # add the user to the db, index by their UID
+    db.collection(u'users').document(uid).set(user.to_dict())
 
     return str(data)
 
