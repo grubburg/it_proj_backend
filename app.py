@@ -1,4 +1,5 @@
 
+from flask import Flask, request
 from schemas import user
 import os
 
@@ -30,7 +31,13 @@ Base route. TODO: replace with something meaniful
 def hello_world():
     return "compu-global-hyper-mega-net was here!"
 
+@app.route('/test/', methods=['POST'])
+def testroute():
+    data = request.get_json()
 
+    first = data['first']
+    item = first['1']
+    return str(item)
 """
 Add an item to the database. 
 TODO: add logic to add item to a users list of items.
@@ -62,10 +69,11 @@ Valid fireauth token must be provided.
 """
 @app.route('/signup/', methods=['POST'])
 def signUp():
+    
+    id_token = request.headers['Authorization'].split(' ').pop()
     data = request.get_json()
 
     # retrieve and decode the users token
-    id_token = data['token']
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
     
@@ -73,7 +81,6 @@ def signUp():
     data['items'] = []
     
     # remove the token from the user object
-    del data['token']
     user = User(data) 
     # add the user to the db, index by their UID
     db.collection(u'users').document(uid).set(user.to_dict())
@@ -88,8 +95,8 @@ to supply the app with user information.
 @app.route('/login/', methods=['POST'])
 def login():
     # capture the request and recover use id
-    data = request.get_json()
-    id_token = data['token']
+    data = request.get_json() 
+    id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
     # collect the user doc from the database
