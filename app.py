@@ -1,6 +1,6 @@
 
 from flask import Flask, request
-from schemas import user
+from schemas.user import User
 import os
 
 import firebase_admin
@@ -106,4 +106,4 @@ def login():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
