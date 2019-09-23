@@ -81,7 +81,7 @@ def signUp():
     data['items'] = []
     
     # remove the token from the user object
-    user = User(data) 
+    user = User(data['name'], data['email']) 
     # add the user to the db, index by their UID
     db.collection(u'users').document(uid).set(user.to_dict())
 
