@@ -130,15 +130,30 @@ def createFamily():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
-    
-
+   
+    #retrieve the users current list of families 
+    user_data = db.collection(u'users').document(uid).get()
+    user_data = user_data.to_dict()
+    current_families = user_data['families']
+     
+    #create family object
     name = data['name']
     family = Family(name)
     family.members.append(uid)
     family_token = secrets.token_urlsafe(8)
     family.token = family_token
+    current_families.append(family_token)
+   
+   #batched write to database
+    batch = db.batch()
+    user_ref = db.collection(u'users').document(uid)
+    batch.update(user_ref, {u'currentfamily':family_token,u'families': current_families})
+
+    family_ref = db.collection(u'families').document(family_token)
     
-    db.collection(u'families').document(family_token).set(family.to_dict())
+    batch.set(family_ref, family)
+
+    batch.commit()
 
     return str(family.to_dict())
 
