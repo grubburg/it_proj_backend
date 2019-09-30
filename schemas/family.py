@@ -7,7 +7,7 @@ class Family(object):
 
     @staticmethod
     def from_dict(source):
-        family = family(source[u'name'])
+        family = Family(source[u'name'])
         return family
 
     def to_dict(self):

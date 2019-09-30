@@ -1,10 +1,13 @@
 
 from flask import Flask, request
+from flask_api import status
 from schemas.user import User
 from schemas.item import Item
 from schemas.family import Family
 import os
 import secrets
+import google.cloud.exceptions
+
 
 import firebase_admin
 from firebase_admin import auth
@@ -201,17 +204,18 @@ def joinFamily():
     # find family in the database. If the family does not exist, 
     # return a not_found status code.
     family_ref = db.collection(u'families').document(family_token)
-    try:
-        family = Family.from_dict(family_ref.get().to_dict())
-    except google.cloud.exception.NotFound:
+    doc = family_ref.get()
+    
+    if not doc.exists:
         return "Family not found!", status.HTTP_404_NOT_FOUND
 
    
+    family = Family.from_dict(doc.to_dict())
     user_ref = db.collection(u'users').document(uid)
     #add the family id to the users list of families.   
     user = User.from_dict(user_ref.get().to_dict())
     user_families = user.families
-    user_families.append(family)
+    user_families.append(family_token)
     
     #add the user to the family's list of members.
     members = family.members
