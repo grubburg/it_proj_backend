@@ -131,6 +131,8 @@ def createFamily():
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
     
+
+    name = data['name']
     family = Family(name)
     family.members.append(uid)
     family_token = secrets.token_urlsafe(8)
