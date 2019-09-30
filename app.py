@@ -151,7 +151,7 @@ def createFamily():
 
     family_ref = db.collection(u'families').document(family_token)
     
-    batch.set(family_ref, family)
+    batch.set(family_ref, family.to_dict())
 
     batch.commit()
 
