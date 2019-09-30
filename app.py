@@ -63,6 +63,21 @@ def getAllItems():
     return itemstr
 
 
+@app.route('/useritems/')
+def getAllItems():
+    
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+    user_data = db.collection(u'users').document(uid).get()
+    user_dict = user_data.to_dict()
+
+    items = user_data['items']
+    
+    return str(items)
+
+
+
 """
 Create a new user in the database.
 Valid fireauth token must be provided. 
