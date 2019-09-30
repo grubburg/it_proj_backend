@@ -13,14 +13,13 @@ class Family(object):
     def to_dict(self):
 
         family = {
-                u'name':    self.name
-                u'token':   self.token
-                u'members': self.token
+                u'name':    self.name,
+                u'token':   self.token,
+                u'members': self.token,
                 u'items':   self.items
                 }
         return family
     def __repr__(self):
         return (
                 u'Family(name={}, token={}, members={}, items={})'.format(self.name, self.token, self.members, self.items)
-
-
+                )

@@ -1,7 +1,10 @@
 
 from flask import Flask, request
 from schemas.user import User
+from schemas.item import Item
+from schemas.family import Family
 import os
+import secrets
 
 import firebase_admin
 from firebase_admin import auth
@@ -53,6 +56,7 @@ def addItem():
 List all items in the database
 TODO: List only items for a given user. 
 """
+"""
 @app.route('/items/')
 def getAllItems():
     items = db.collection(u'items').stream()
@@ -61,7 +65,7 @@ def getAllItems():
 
         itemstr += str(item.to_dict()) + '\n'
     return itemstr
-
+"""
 
 @app.route('/useritems/')
 def getAllItems():
@@ -109,7 +113,7 @@ to supply the app with user information.
 """
 @app.route('/login/', methods=['POST'])
 def login():
-    # capture the request and recover use id
+    # capture the request data and retrieve uid from token
     data = request.get_json() 
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
@@ -118,6 +122,28 @@ def login():
     user_data = db.collection(u'users').document(uid).get()
 
     return str(user_data.to_dict())
+
+@app.route('/createfamily/', methods=['POST'])
+def createFamily():
+    #capture request data and retrieve uid from token
+    data = request.get_json()
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+    
+    family = Family(name)
+    family.members.append(uid)
+    family_token = secrets.token_urlsafe(8)
+    family.token = family_token
+    
+    db.collection(u'families').document(family_token).set(family.to_dict())
+
+    return str(family.to_dict())
+
+
+
+
+
 
 
 if __name__ == '__main__':

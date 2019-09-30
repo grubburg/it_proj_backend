@@ -17,7 +17,7 @@ class User(object):
         user = {
                 u'name':            self.name,
                 u'email':           self.email,
-                u'currentfamily':   self.currentfamily
+                u'currentfamily':   self.currentfamily,
                 u'families':        self.families
             }
         return user
