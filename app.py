@@ -123,7 +123,7 @@ def login():
 
     return str(user_data.to_dict())
 
-@app.route('/createfamily/', methods=['POST'])
+@app.route('/family/create/', methods=['POST'])
 def createFamily():
     #capture request data and retrieve uid from token
     data = request.get_json()
@@ -156,12 +156,74 @@ def createFamily():
     batch.commit()
 
     return str(family.to_dict())
+"""
+Retrieve the join token of a users current family. If the user
+is not currently part of a family, an error is returned.
+"""
+@app.route('/family/token/')
+def getFamilyToken():
+    
+    # Capture request data and extract user id from token.
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+    doc_ref = db.collection(u'users').document(uid)
+    # build the user object
+    doc = doc_ref.get()
+    user = User.from_dict(doc.to_dict())
+    
+    # if the token exists, return it. Otherwise return a 404
+    token = user.currentfamily
+    if token:
+        return str(token)
+    else:
+        return "Error: user is not part of a family.", status.HTTP_404_NOT_FOUND
 
 
+    
+"""
+Route to join a user to a family. The user provides a family
+joining token, and in turn the family is added to the user's
+list of families. 
+"""
 
+@app.route('/family/join', methods=['POST'])
+def joinFamily():
+    
+    #capture request data and extract uid from token
+    data = request.get_json()
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+    #extract family identifier from request
+    family_token = data['family_token']
+    
+    # find family in the database. If the family does not exist, 
+    # return a not_found status code.
+    family_ref = db.collection(u'families').document(family_token)
+    try:
+        family = Family.from_dict(family_ref.get().to_dict())
+    except google.cloud.exception.NotFound:
+        return "Family not found!", status.HTTP_404_NOT_FOUND
 
+   
+    user_ref = db.collection(u'users').document(uid)
+    #add the family id to the users list of families.   
+    user = User.from_dict(user_ref.get().to_dict())
+    user_families = user.families
+    user_families.append(family)
+    
+    #add the user to the family's list of members.
+    members = family.members
+    members.append(uid)
+    
+    # commit changes to the database in a batch
+    batch = db.batch()
+    batch.update(user_ref, {'currentfamily': family_token, 'families': user_families})
+    batch.update(family_ref, {'members': members})
+    batch.commit()
 
-
+    return "Family joined successfully."
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
