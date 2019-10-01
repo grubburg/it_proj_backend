@@ -15,7 +15,7 @@ class Family(object):
         family = {
                 u'name':    self.name,
                 u'token':   self.token,
-                u'members': self.token,
+                u'members': self.members,
                 u'items':   self.items
                 }
         return family

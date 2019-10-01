@@ -1,4 +1,3 @@
-
 from flask import Flask, request
 from flask_api import status
 from schemas.user import User
@@ -89,7 +88,7 @@ def getAllItems():
 Create a new user in the database.
 Valid fireauth token must be provided. 
 """
-@app.route('/signup/', methods=['POST'])
+@app.route('/user/signup/', methods=['POST'])
 def signUp():
     
     id_token = request.headers['Authorization'].split(' ').pop()
@@ -114,10 +113,10 @@ Send a fireauth token and retrieve a given users information.
 NOTE: This is not a session management function, it simply serves
 to supply the app with user information. 
 """
-@app.route('/login/', methods=['POST'])
+@app.route('/user/info/')
 def login():
     # capture the request data and retrieve uid from token
-    data = request.get_json() 
+    # data = request.get_json() 
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
@@ -153,7 +152,7 @@ def createFamily():
     batch.update(user_ref, {u'currentfamily':family_token,u'families': current_families})
 
     family_ref = db.collection(u'families').document(family_token)
-    
+    print(family) 
     batch.set(family_ref, family.to_dict())
 
     batch.commit()

@@ -1,14 +1,14 @@
 class User(object):
-    def __init__(self, name, email):
+    def __init__(self, name, email, currentfamily="", families=[]):
         self.name = name
         self.email = email
-        self.currentfamily = ""
-        self.families = []
+        self.currentfamily = currentfamily
+        self.families = families
 
 
     @staticmethod
     def from_dict(source):
-        user = User(source[u'name'], source[u'email'])
+        user = User(source[u'name'], source[u'email'], source[u'currentfamily'], source[u'families'])
 
         return user
 
