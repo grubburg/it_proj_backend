@@ -1,14 +1,14 @@
 class Item(object):
-    def __init__(self, name, image, description, tags):
+    def __init__(self, name, image, description, tags, visibility=[]):
         self.name = name
         self.image = image
         self.description = description
         self.tags = tags
-        self.users = []
+        self.visibility = visibility
     
     @staticmethod
     def from_dict(source):
-        item = Item(source[u'name'], source[u'image'], source[u'description'], source[u'tags'])
+        item = Item(source[u'name'], source[u'image'], source[u'description'], source[u'tags'], source[u'visibility'])
         return item
     
     def to_dict(self):
@@ -17,6 +17,7 @@ class Item(object):
                 u'image':       self.image,
                 u'description': self.description,
                 u'tags':        self.tags
+                u'visibility':  self.visibility
                 }
         return item
 

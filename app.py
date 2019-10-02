@@ -37,32 +37,6 @@ def hello_world():
     return "compu-global-hyper-mega-net was here!"
 
 
-
-"""
-Add an item to the database. 
-TODO: add logic to add item to a users list of items.
-"""
-@app.route('/item/add', methods=['POST'])
-def addItem():
-    id_token = request.headers['Authorization'].split(' ').pop()
-    decoded_token = auth.verify_id_token(id_token)
-    uid = decoded_token['uid']
-
-
-"""
-List all items in the database
-TODO: List only items for a given user. 
-"""
-@app.route('/items/')
-def getAllItems():
-    items = db.collection(u'items').stream()
-    itemstr = ''
-    for item in items:
-
-        itemstr += str(item.to_dict()) + '\n'
-    return itemstr
-
-
 """
 Create a new user in the database.
 Valid fireauth token must be provided. 
@@ -155,6 +129,17 @@ def getAllItems():
 
     return str(item_dict)
 
+@app.route('/item/add', methods=['POST'])
+def addItem():
+    data = request.get_json()
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+    
+    item = Item.from_dict(data)
+
+
+    
 
 
 @app.route('/family/create/', methods=['POST'])
