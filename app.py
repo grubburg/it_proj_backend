@@ -37,22 +37,7 @@ def hello_world():
     return "compu-global-hyper-mega-net was here!"
 
 
-def test2():
-    return "Success"
 
-
-@app.route('/test/')
-def runroute():
-    test2()
-    return 'a'
-
-
-# def testroute():
-#     data = request.get_json()
-
-#     first = data['first']
-#     item = first['1']
-#     return str(item)
 """
 Add an item to the database. 
 TODO: add logic to add item to a users list of items.
@@ -68,7 +53,6 @@ def addItem():
 List all items in the database
 TODO: List only items for a given user. 
 """
-"""
 @app.route('/items/')
 def getAllItems():
     items = db.collection(u'items').stream()
@@ -77,21 +61,6 @@ def getAllItems():
 
         itemstr += str(item.to_dict()) + '\n'
     return itemstr
-"""
-
-
-@app.route('/useritems/')
-def getAllItems():
-
-    id_token = request.headers['Authorization'].split(' ').pop()
-    decoded_token = auth.verify_id_token(id_token)
-    uid = decoded_token['uid']
-    user_data = db.collection(u'users').document(uid).get()
-    user_dict = user_data.to_dict()
-
-    items = user_data['items']
-
-    return str(items)
 
 
 """
@@ -157,6 +126,35 @@ def getFamilyInfo():
         family_dict[token] = family_ref.get().to_dict()
 
     return str(family_dict)
+
+@app.route('/item/list')
+def getAllItems():
+
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+    
+    user_ref = db.collenction(u'users').document(uid)
+    user = User.from_dict(user_ref.get().to_dict())
+    current_family = user['currentfamily']
+
+    current_family_ref = db.collection(u'families').document(current_family)
+
+    current_family = Family.from_dict(current_family_ref.get().to_dict())
+    item_id_list = current_family['items']
+    
+    item_dict = {}
+
+    for item_id in item_id_list:
+        item_ref = db.collection(u'items').document(item_id)
+        item = Item.form_dict(item_ref.get().to_dict())
+        
+        if uid in item['visibility']:
+            item_dict[item_id] = item.to_dict()
+
+
+    return str(item_dict)
+
 
 
 @app.route('/family/create/', methods=['POST'])
