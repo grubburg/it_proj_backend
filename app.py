@@ -290,5 +290,30 @@ def getFamilyInfo():
     return str(family.to_dict())
 
 
+@app.route("/family/info/members")
+def getFamilyMembers():
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+
+    user_ref = db.collection(u'users').document(uid)
+    user = User.from_dict(user_ref.get().to_dict())
+
+    family_token = user.currentfamily
+    family_ref = db.collection(u'families').document(family_token)
+    family = Family.from_dict(family_ref.get().to_dict())
+
+    member_ids = family.members
+
+    family_member_dict = {}
+
+    for member_id in member_ids:
+        member_ref = db.collection(u'users').document(member_id)
+        member = User.from_dict(member_ref.get().to_dict())
+        family_member_dict[member_id] = member.to_dict()
+
+    return str(family_member_dict())
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
