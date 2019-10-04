@@ -82,7 +82,7 @@ def login():
     return str(user_data.to_dict())
 
 
-@app.route("/user/info/families")
+@app.route("/user/info/families/")
 def getAllFamilies():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
@@ -106,7 +106,7 @@ def getAllFamilies():
 
 ################ ITEM ROUTES ###############
 
-@app.route('/item/list')
+@app.route('/item/list/')
 def getAllItems():
 
     id_token = request.headers['Authorization'].split(' ').pop()
@@ -136,7 +136,7 @@ def getAllItems():
     return str(item_dict)
 
 
-@app.route('/item/add', methods=['POST'])
+@app.route('/item/add/', methods=['POST'])
 def addItem():
     data = request.get_json()
     print(data)
@@ -169,7 +169,7 @@ def addItem():
     return str(item.to_dict())
 
 
-@app.route("/item/add/ref")
+@app.route("/item/add/ref/")
 def getItemRef():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
@@ -260,7 +260,7 @@ list of families.
 """
 
 
-@app.route('/family/join', methods=['POST'])
+@app.route('/family/join/', methods=['POST'])
 def joinFamily():
 
     # capture request data and extract uid from token
@@ -317,7 +317,7 @@ def getFamilyInfo():
     return str(family.to_dict())
 
 
-@app.route("/family/info/members")
+@app.route("/family/info/members/")
 def getFamilyMembers():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
