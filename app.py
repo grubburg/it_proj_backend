@@ -37,6 +37,8 @@ def hello_world():
     return "compu-global-hyper-mega-net was here!"
 
 
+################ USER ROUTES ###############
+
 """
 Create a new user in the database.
 Valid fireauth token must be provided. 
@@ -81,7 +83,7 @@ def login():
 
 
 @app.route("/user/info/families")
-def getFamilyInfo():
+def getAllFamilies():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
@@ -101,33 +103,38 @@ def getFamilyInfo():
 
     return str(family_dict)
 
+
+################ ITEM ROUTES ###############
+
 @app.route('/item/list')
 def getAllItems():
 
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
-    
+
     user_ref = db.collenction(u'users').document(uid)
     user = User.from_dict(user_ref.get().to_dict())
-    current_family = user['currentfamily']
+    current_family = user.currentfamily
 
     current_family_ref = db.collection(u'families').document(current_family)
-
     current_family = Family.from_dict(current_family_ref.get().to_dict())
-    item_id_list = current_family['items']
-    
+    item_id_list = current_family.items
+
     item_dict = {}
 
     for item_id in item_id_list:
         item_ref = db.collection(u'items').document(item_id)
-        item = Item.form_dict(item_ref.get().to_dict())
-        
-        if uid in item['visibility']:
-            item_dict[item_id] = item.to_dict()
+        item = Item.from_dict(item_ref.get().to_dict())
 
+        if not item.visibility:
+            item_dict[item_id] = item.to_dict()
+        else:
+            if uid in item.visibility:
+                item_dict[item_id] = item.to_dict()
 
     return str(item_dict)
+
 
 @app.route('/item/add', methods=['POST'])
 def addItem():
@@ -135,12 +142,30 @@ def addItem():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
-    
+
+    user_ref = db.collection(u'users').document(uid)
+    user = User.from_dict(user_ref.get().to_dict())
+    current_family = user.currentfamily
+
+    family_ref = db.collection(u'families').document(current_family)
+    family = Family.from_dict(family_ref.get().to_dict())
+
     item = Item.from_dict(data)
+    item_ref = db.collection(u'items').add(item)
+
+    family.items.append(item_ref)
+
+    batch = db.batch()
+
+    batch.set(family_ref, family, merge=True)
+    batch.set(item_ref, item)
+
+    batch.commit()
+
+    return str(item.to_dict())
 
 
-    
-
+################ FAMILY ROUTES ###############
 
 @app.route('/family/create/', methods=['POST'])
 def createFamily():
@@ -247,6 +272,22 @@ def joinFamily():
     batch.commit()
 
     return "Family joined successfully."
+
+
+@app.route("/family/info/")
+def getFamilyInfo():
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+
+    user_ref = db.collection(u'users').document(uid)
+    user = User.from_dict(user_ref.get().to_dict())
+
+    family_token = user.currentfamily
+    family_ref = db.collection(u'families').document(family_token)
+    family = Family.from_dict(family_ref.get().to_dict())
+
+    return str(family.to_dict())
 
 
 if __name__ == '__main__':
