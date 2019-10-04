@@ -1,5 +1,8 @@
+import ast
+
+
 class Item(object):
-    def __init__(self, name, image, description, tags, visibility=[]):
+    def __init__(self, name, image, description, tags=[], visibility=[]):
         self.name = name
         self.image = image
         self.description = description
@@ -24,6 +27,6 @@ class Item(object):
 
     def __repr__(self):
         return(
-            u'User(name={}, image={}, description={}, tags={}'.format(
-                self.name, self.image, self.description, self.tags)
+            u'User(name={}, image={}, description={}, tags={}, visibility={}'.format(
+                self.name, self.image, self.description, self.tags, self.visibility)
         )

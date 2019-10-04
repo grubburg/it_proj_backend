@@ -6,7 +6,7 @@ from schemas.family import Family
 import os
 import secrets
 import google.cloud.exceptions
-
+import ast
 
 import firebase_admin
 from firebase_admin import auth
@@ -30,7 +30,7 @@ app = Flask(__name__)
 
 ################ ROUTES ###############
 """
-Base route. TODO: replace with something meaniful 
+Base route. TODO: replace with something meaniful
 """
 @app.route('/')
 def hello_world():
@@ -41,7 +41,7 @@ def hello_world():
 
 """
 Create a new user in the database.
-Valid fireauth token must be provided. 
+Valid fireauth token must be provided.
 """
 @app.route('/user/signup/', methods=['POST'])
 def signUp():
@@ -67,7 +67,7 @@ def signUp():
 """
 Send a fireauth token and retrieve a given users information.
 NOTE: This is not a session management function, it simply serves
-to supply the app with user information. 
+to supply the app with user information.
 """
 @app.route('/user/info/')
 def login():
@@ -113,7 +113,7 @@ def getAllItems():
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
 
-    user_ref = db.collenction(u'users').document(uid)
+    user_ref = db.collection(u'users').document(uid)
     user = User.from_dict(user_ref.get().to_dict())
     current_family = user.currentfamily
 
@@ -126,7 +126,7 @@ def getAllItems():
     for item_id in item_id_list:
         item_ref = db.collection(u'items').document(item_id)
         item = Item.from_dict(item_ref.get().to_dict())
-
+        print(type(item.visibility))
         if not item.visibility:
             item_dict[item_id] = item.to_dict()
         else:
@@ -139,6 +139,7 @@ def getAllItems():
 @app.route('/item/add', methods=['POST'])
 def addItem():
     data = request.get_json()
+    print(data)
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
@@ -151,18 +152,43 @@ def addItem():
     family = Family.from_dict(family_ref.get().to_dict())
 
     item = Item.from_dict(data)
-    item_ref = db.collection(u'items').add(item)
+    item_ref = db.collection(u'items').document()
+    item_ref.set(item.to_dict())
 
-    family.items.append(item_ref)
+    family.items.append(item_ref.id)
 
-    batch = db.batch()
+    family_ref.set(family.to_dict())
 
-    batch.set(family_ref, family, merge=True)
-    batch.set(item_ref, item)
+    # batch = db.batch()
 
-    batch.commit()
+    # batch.set(family_ref, family, merge=True)
+    # #batch.set(item_ref, item)
+
+    # batch.commit()
 
     return str(item.to_dict())
+
+
+@app.route("/item/add/ref")
+def getItemRef():
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+
+    user_ref = db.collection(u'users').document(uid)
+    user = User.from_dict(user_ref.get().to_dict())
+    current_family = user.currentfamily
+
+    family_ref = db.collection(u'families').document(current_family)
+    print(family_ref.get().to_dict())
+    family = Family.from_dict(family_ref.get().to_dict())
+    print(family)
+    num_items = len(family.items)
+    family_token = family.token
+
+    resp = {family_token: num_items}
+
+    return str(resp)
 
 
 ################ FAMILY ROUTES ###############
@@ -230,7 +256,7 @@ def getFamilyToken():
 """
 Route to join a user to a family. The user provides a family
 joining token, and in turn the family is added to the user's
-list of families. 
+list of families.
 """
 
 
@@ -285,6 +311,7 @@ def getFamilyInfo():
 
     family_token = user.currentfamily
     family_ref = db.collection(u'families').document(family_token)
+
     family = Family.from_dict(family_ref.get().to_dict())
 
     return str(family.to_dict())
@@ -312,7 +339,7 @@ def getFamilyMembers():
         member = User.from_dict(member_ref.get().to_dict())
         family_member_dict[member_id] = member.to_dict()
 
-    return str(family_member_dict())
+    return str(family_member_dict)
 
 
 if __name__ == '__main__':
