@@ -78,7 +78,7 @@ def getAllItems():
         
         # if the visibility array is empty, this implies 
         # global visibility
-        if not item.visibility:
+        if "global" in item.visibility:
             item_dict[item_id] = item.to_dict()
         # if not empty, we check if the user is explicity
         # allowed to view the item.
