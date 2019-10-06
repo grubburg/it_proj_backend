@@ -21,7 +21,7 @@ Defines the following routes:
 
 
 
-################ IMPORTS ################
+#################### IMPORTS ###################
 
 from flask import Blueprint, request, g
 from flask import current_app as app
@@ -31,7 +31,7 @@ from objectify.schemas.user import User
 from objectify.schemas.family import Family
 from objectify.schemas.item import Item
 
-##########################################
+################################################
 
 user_bp = Blueprint("user_bp",__name__)
 
@@ -40,7 +40,7 @@ db = g.db
 
 
 
-################ USER ROUTES ################
+################## USER ROUTES #################
 
 """
 Create a new user in the database.

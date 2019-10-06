@@ -45,13 +45,9 @@ item_bp = Blueprint("item_bp", __name__)
 db = g.db
 ################################################
 
+#################### HELPERS ###################
 
-
-
-################## ITEM ROUTES #################
-
-@item_bp.route('/item/list/')
-def getAllItems():
+def getUserFromRequest(request):
 
     # retrieve use token from database
     id_token = request.headers['Authorization'].split(' ').pop()
@@ -61,9 +57,29 @@ def getAllItems():
     # retrieve current user and current family
     user_ref = db.collection(u'users').document(uid)
     user = User.from_dict(user_ref.get().to_dict())
-    current_family = user.currentfamily
-    current_family_ref = db.collection(u'families').document(current_family)
+
+    return uid, user
+
+
+def getCurrentFamily(user):
+    current_family_token = user.currentfamily
+    current_family_ref = db.collection(u'families').document(current_family_token)
     current_family = Family.from_dict(current_family_ref.get().to_dict())
+
+    return current_family
+
+
+
+################################################
+
+################## ITEM ROUTES #################
+
+@item_bp.route('/item/list/')
+def getAllItems():
+
+    uid , user = getUserFromRequest(request)
+
+    current_family = getCurrentFamily(user)
     
     # retrieve list of items in current family
     item_id_list = current_family.items
@@ -95,13 +111,8 @@ def addItem():
     # retrieve request data and user ID from request
     data = request.get_json()
     
-    id_token = request.headers['Authorization'].split(' ').pop()
-    decoded_token = auth.verify_id_token(id_token)
-    uid = decoded_token['uid']
+    _ , user = getUserFromRequest(request)
 
-    # retrieve user and current family from database
-    user_ref = db.collection(u'users').document(uid)
-    user = User.from_dict(user_ref.get().to_dict())
     current_family = user.currentfamily
     family_ref = db.collection(u'families').document(current_family)
     family = Family.from_dict(family_ref.get().to_dict())
@@ -131,16 +142,9 @@ def addItem():
 def getItemRef():
     
     
-    # retrieve user token and id from request
-    id_token = request.headers['Authorization'].split(' ').pop()
-    decoded_token = auth.verify_id_token(id_token)
-    uid = decoded_token['uid']
+    _ , user = getUserFromRequest(request)
 
-    # retrieve user from dp
-    user_ref = db.collection(u'users').document(uid)
-    user = User.from_dict(user_ref.get().to_dict())
     current_family = user.currentfamily
-
     family_ref = db.collection(u'families').document(current_family)
     
     # construct the family object
@@ -152,3 +156,33 @@ def getItemRef():
     resp = {family_token: num_items}
 
     return str(resp)
+
+@item_bp.route("/item/delete/", methods=['POST'])
+def deleteItem():
+
+    data = request.get_json()
+    item_id = data['item']
+    _ , user = getUserFromRequest(request)
+
+    current_family = user.currentfamily
+
+    family_ref = db.collection(u'families').document(current_family)
+    item_ref = db.collection(u'items').document(item_id)
+
+    # construct the family object
+    family = Family.from_dict(family_ref.get().to_dict())
+
+    family_item_list = family.items
+
+    family_item_list.remove(item_id)
+
+    item_field = {"items": family_item_list}
+
+    family_ref.update(item_field)
+    item_ref.delete()
+
+    return str(item_field)
+
+
+    
+

@@ -12,6 +12,5 @@ def hello_world():
     return "compu-global-hyper-mega-net was here!"
 
 
-
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')
