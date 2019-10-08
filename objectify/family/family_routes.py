@@ -41,6 +41,7 @@ db = g.db # reference the firestore client
 def createFamily():
     # capture request data and retrieve uid from token
     data = request.get_json()
+    print(request.data)
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
