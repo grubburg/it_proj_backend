@@ -54,6 +54,7 @@ def createFamily():
     # create family object
     name = data['name']
     family = Family(name)
+    
     family.members.append(uid)
     family_token = secrets.token_urlsafe(8)
     family.token = family_token

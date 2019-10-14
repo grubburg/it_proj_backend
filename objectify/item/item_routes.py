@@ -184,5 +184,25 @@ def deleteItem():
     return str(item_field)
 
 
+@item_bp.route("/item/info/", methods=["POST"])
+def getItemInfo():
     
+    data = request.get_json()
+    item_id = data['item_token']
+    _,user = getUserFromRequest(request)
+
+    item_ref = db.collection(u'items') 
+
+    item = Item.from_dict(item_ref.get().to_dict())
+
+    return str(item.to_dict())
+
+
+
+
+
+
+
+
+
 
