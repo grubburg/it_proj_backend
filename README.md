@@ -26,11 +26,11 @@ app.py
 |       Routes related to item management. 
 |
 |
-|---schemas
-|     |   Python class definitions for firebase schama
-|     |
-|     |---user.py
-|     |---family.py
-      |---item.py
+|--schemas
+|    |  Python class definitions for firebase schama
+|    |
+|    |---user.py
+|    |---family.py
+     |---item.py
 ```
 
