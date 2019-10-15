@@ -10,9 +10,27 @@ Database: Firestore
 ```
 app.py
 |
-|__user
+|--user
+|   |---user_routes.py
+|       
+|       Routes related to user management.
 |
-|__family
+|--family
+|   |---family_routes.py
 |
-|__items
+|       Routes related to family management.
+|
+|--items
+|   |---item_routes.py
+|
+|       Routes related to item management. 
+|
+|
+|---schemas
+|     |   Python class definitions for firebase schama
+|     |
+|     |---user.py
+|     |---family.py
+      |---item.py
 ```
+
