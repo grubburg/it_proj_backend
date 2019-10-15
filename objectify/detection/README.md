@@ -9,8 +9,18 @@
 - Detection
   `/detection/`
   
-  ```json
-  {
-    'image': '<firestore-ref>'
-  }
-  ```
+  - Request format:
+  
+    ```json
+    {
+      'image': '<firestore-ref>'
+    }
+    ```
+  
+  - Returns:
+    ```json
+    {
+      'tags': '[<tag-array>]'
+    }
+    ```
+  
