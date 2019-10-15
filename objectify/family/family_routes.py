@@ -8,7 +8,6 @@ Defines the following routes:
 """
 
 
-
 #################### IMPORTS ###################
 from flask import Blueprint, request, g
 from flask import current_app as app
@@ -23,16 +22,30 @@ from firebase_admin import auth
 ################################################
 
 
-
 #################### GLOBALS ###################
 
 # create the family blueprint
 family_bp = Blueprint("family_bp", __name__)
 
-db = g.db # reference the firestore client
+db = g.db  # reference the firestore client
 ################################################
 
 
+#################### GLOBALS ###################
+def getUserFromRequest(request):
+
+    # retrieve use token from database
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+
+    # retrieve current user and current family
+    user_ref = db.collection(u'users').document(uid)
+    user = User.from_dict(user_ref.get().to_dict())
+
+    return uid, user
+
+################################################
 
 
 ################# FAMILY ROUTES ################
@@ -54,7 +67,7 @@ def createFamily():
     # create family object
     name = data['name']
     family = Family(name)
-    
+
     family.members.append(uid)
     family_token = secrets.token_urlsafe(8)
     family.token = family_token
@@ -148,8 +161,7 @@ def joinFamily():
 
 @family_bp.route("/family/info/")
 def getFamilyInfo():
-    
-    
+
     # extract uid from auth token
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
@@ -159,7 +171,7 @@ def getFamilyInfo():
     user_ref = db.collection(u'users').document(uid)
     user = User.from_dict(user_ref.get().to_dict())
 
-    # extract current family token and use it to 
+    # extract current family token and use it to
     # retrieve family from database
     family_token = user.currentfamily
     family_ref = db.collection(u'families').document(family_token)
@@ -170,7 +182,7 @@ def getFamilyInfo():
 
 @family_bp.route("/family/info/members/")
 def getFamilyMembers():
-    
+
     # extract uid from auth token
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
@@ -185,8 +197,7 @@ def getFamilyMembers():
     family_ref = db.collection(u'families').document(family_token)
     family = Family.from_dict(family_ref.get().to_dict())
 
-
-    #construct a list of family members and return it
+    # construct a list of family members and return it
     member_ids = family.members
 
     family_member_dict = {}
@@ -197,3 +208,22 @@ def getFamilyMembers():
         family_member_dict[member_id] = member.to_dict()
 
     return str(family_member_dict)
+
+
+@family_bp.route("/family/switch", methods=['POST'])
+def switchFamily():
+
+    data = request.get_json()
+
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+
+    # retrieve user from database
+    user_ref = db.collection(u'users').document(uid)
+
+    new_family_token = data['family']
+
+    user_ref.set({"current_family": new_family_token}, merge=True)
+
+    return str(data)
