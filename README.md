@@ -34,3 +34,6 @@ app.py
      |---item.py
 ```
 
+##Frontend
+Android app
+Link to repo: https://github.com/asilmian/It_proj_android
