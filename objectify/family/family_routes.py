@@ -182,8 +182,6 @@ def getFamilyInfo():
 
     if not uid:
         return status.HTTP_401_UNAUTHORIZED
-    # extract current family token and use it to
-    # retrieve family from database
 
     family_ref = db.collection(u'families').document(family_token)
     family = Family.from_dict(family_ref.get().to_dict())
@@ -192,7 +190,13 @@ def getFamilyInfo():
     resp['name'] = family.name
     resp['token'] = family_token
 
-    names = [member.name for member in family.members]
+    names = []
+    for member in family.members:
+        u_ref = db.collection('user').document(member)
+        name = uref.get().to_dict()['name']
+
+        names.append(name)
+
     resp['members'] = names
 
     return str(resp)
