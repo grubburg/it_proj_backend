@@ -54,10 +54,12 @@ def getUserFromRequest(request):
 def createFamily():
     # capture request data and retrieve uid from token
     data = request.get_json()
-    print(request.data)
+
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
+    if not uid:
+        return status.HTTP_401_UNAUTHORIZED
 
     # retrieve the users current list of families
     user_data = db.collection(u'users').document(uid).get()
@@ -80,7 +82,7 @@ def createFamily():
         user_ref, {u'currentfamily': family_token, u'families': current_families})
 
     family_ref = db.collection(u'families').document(family_token)
-    print(family)
+
     batch.set(family_ref, family.to_dict())
 
     batch.commit()
@@ -99,6 +101,8 @@ def getFamilyToken():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
+    if not uid:
+        return status.HTTP_401_UNAUTHORIZED
     doc_ref = db.collection(u'users').document(uid)
     # build the user object
     doc = doc_ref.get()
@@ -127,6 +131,8 @@ def joinFamily():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
+    if not uid:
+        return status.HTTP_401_UNAUTHORIZED
     # extract family identifier from request
     family_token = data['family_token']
 
@@ -156,31 +162,43 @@ def joinFamily():
     batch.update(family_ref, {'members': members})
     batch.commit()
 
-    return "Family joined successfully."
-
-
-@family_bp.route("/family/info/")
-def getFamilyInfo():
-
-    # extract uid from auth token
-    id_token = request.headers['Authorization'].split(' ').pop()
-    decoded_token = auth.verify_id_token(id_token)
-    uid = decoded_token['uid']
-
-    # retrieve user data from the database
-    user_ref = db.collection(u'users').document(uid)
-    user = User.from_dict(user_ref.get().to_dict())
-
-    # extract current family token and use it to
-    # retrieve family from database
-    family_token = user.currentfamily
-    family_ref = db.collection(u'families').document(family_token)
-    family = Family.from_dict(family_ref.get().to_dict())
-
     return str(family.to_dict())
 
 
-@family_bp.route("/family/info/members/")
+"""
+returns:
+    - family name
+    - invite code
+    - list of members names
+"""
+
+
+@family_bp.route("/family/info/", methods=['POST'])
+def getFamilyInfo():
+
+    data = request.get_json()
+    family_token = data['token']
+    uid, user = getUserFromRequest(request)
+
+    if not uid:
+        return status.HTTP_401_UNAUTHORIZED
+    # extract current family token and use it to
+    # retrieve family from database
+
+    family_ref = db.collection(u'families').document(family_token)
+    family = Family.from_dict(family_ref.get().to_dict())
+
+    resp = {}
+    resp['name'] = family.name
+    resp['token'] = family_token
+
+    names = [member.name for member in family.members]
+    resp['members'] = names
+
+    return str(resp)
+
+
+@family_bp.route("/family/curr/members/")
 def getFamilyMembers():
 
     # extract uid from auth token
@@ -202,6 +220,8 @@ def getFamilyMembers():
 
     family_member_dict = {}
 
+    # TODO filter out family membership field from other family members
+
     for member_id in member_ids:
         member_ref = db.collection(u'users').document(member_id)
         member = User.from_dict(member_ref.get().to_dict())
@@ -210,7 +230,22 @@ def getFamilyMembers():
     return str(family_member_dict)
 
 
-@family_bp.route("/family/switch", methods=['POST'])
+# @family_bp.route("/family/info/members/")
+# def getOtherFamilyMembers():
+#     data = request.get_json()
+
+#     family_token = data['family_token']
+
+#     uid, user = getUserFromRequest(request)
+
+#     family_ref = db.collection("family").document(family_token)
+
+#     family = Family.from_dict(family_ref.get().to_dict())
+
+#     members = family.members
+
+
+@family_bp.route("/family/switch/", methods=['POST'])
 def switchFamily():
 
     data = request.get_json()
@@ -218,6 +253,8 @@ def switchFamily():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
+    if not uid:
+        return status.HTTP_401_UNAUTHORIZED
 
     # retrieve user from database
     user_ref = db.collection(u'users').document(uid)

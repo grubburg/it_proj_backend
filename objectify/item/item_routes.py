@@ -52,6 +52,8 @@ def getUserFromRequest(request):
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
+    if not uid:
+        return status.HTTP_401_UNAUTHORIZED
 
     # retrieve current user and current family
     user_ref = db.collection(u'users').document(uid)
