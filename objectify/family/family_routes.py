@@ -192,9 +192,9 @@ def getFamilyInfo():
 
     names = []
     for member in family.members:
-        u_ref = db.collection('user').document(member)
-        name = uref.get().to_dict()['name']
-
+        u_ref = db.collection('users').document(member)
+        name = u_ref.get().to_dict()['name']
+        
         names.append(name)
 
     resp['members'] = names
@@ -265,6 +265,6 @@ def switchFamily():
 
     new_family_token = data['family']
 
-    user_ref.set({"current_family": new_family_token}, merge=True)
+    user_ref.set({"currentfamily": new_family_token}, merge=True)
 
     return str(data)
