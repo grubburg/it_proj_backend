@@ -18,9 +18,6 @@ Defines the following routes:
 """
 
 
-
-
-
 #################### IMPORTS ###################
 
 from flask import Blueprint, request, g
@@ -33,11 +30,10 @@ from objectify.schemas.item import Item
 
 ################################################
 
-user_bp = Blueprint("user_bp",__name__)
+user_bp = Blueprint("user_bp", __name__)
 
 
 db = g.db
-
 
 
 ################## USER ROUTES #################
@@ -105,3 +101,16 @@ def getAllFamilies():
         family_dict[token] = family_ref.get().to_dict()
 
     return str(family_dict)
+
+
+@user_bp.route("/user/delete/")
+def deleteUser():
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+
+    user_ref = db.collection(u'users').document(uid)
+
+    user_ref.delete()
+
+    return "User deleted Successfuly"

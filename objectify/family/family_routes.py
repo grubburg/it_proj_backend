@@ -70,7 +70,7 @@ def createFamily():
     name = data['name']
     family = Family(name)
 
-    family.members.append(uid)
+    family.members = [uid]
     family_token = secrets.token_urlsafe(8)
     family.token = family_token
     current_families.append(family_token)
@@ -194,7 +194,7 @@ def getFamilyInfo():
     for member in family.members:
         u_ref = db.collection('users').document(member)
         name = u_ref.get().to_dict()['name']
-        
+
         names.append(name)
 
     resp['members'] = names
@@ -209,6 +209,9 @@ def getFamilyMembers():
     id_token = request.headers['Authorization'].split(' ').pop()
     decoded_token = auth.verify_id_token(id_token)
     uid = decoded_token['uid']
+
+    if not uid:
+        return status.HTTP_401_UNAUTHORIZED
 
     # retrieve user from database
     user_ref = db.collection(u'users').document(uid)
@@ -234,21 +237,6 @@ def getFamilyMembers():
     return str(family_member_dict)
 
 
-# @family_bp.route("/family/info/members/")
-# def getOtherFamilyMembers():
-#     data = request.get_json()
-
-#     family_token = data['family_token']
-
-#     uid, user = getUserFromRequest(request)
-
-#     family_ref = db.collection("family").document(family_token)
-
-#     family = Family.from_dict(family_ref.get().to_dict())
-
-#     members = family.members
-
-
 @family_bp.route("/family/switch/", methods=['POST'])
 def switchFamily():
 
@@ -266,5 +254,7 @@ def switchFamily():
     new_family_token = data['family']
 
     user_ref.set({"currentfamily": new_family_token}, merge=True)
-
     return str(data)
+
+
+@family_bp.route("/family/leave/")
