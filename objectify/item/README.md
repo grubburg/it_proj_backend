@@ -14,15 +14,20 @@
         
    - `/item/add/`
     - Add an item to the current family for the current user. 
-    - Request format:
-      ```
-      {
-        'description': <itemdescription>,
-        'image': <firestore reference>,
-        'name': <item name>,
-        'tags': <tag array>,
-        'visibility': <member visibility array>
-      }
-      ```
+      - Request format:
+        ```
+        {
+          'description': <itemdescription>,
+          'image': <firestore reference>,
+          'name': <item name>,
+          'tags': <tag array>,
+          'visibility': <member visibility array>
+        }
+        ```
       - Response format:
         - Returns item JSON
+
+    - `/item/add/ref/`
+      - Return the next index that should be used to label an item being added to firebase storage.
+      
+      
