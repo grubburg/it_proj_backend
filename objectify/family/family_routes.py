@@ -255,6 +255,3 @@ def switchFamily():
 
     user_ref.set({"currentfamily": new_family_token}, merge=True)
     return str(data)
-
-
-@family_bp.route("/family/leave/")
