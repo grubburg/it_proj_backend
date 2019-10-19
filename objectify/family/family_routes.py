@@ -177,7 +177,7 @@ returns:
 def getFamilyInfo():
 
     data = request.get_json()
-    family_token = data['token']
+    family_token = data['family_token']
     uid, user = getUserFromRequest(request)
 
     if not uid:
@@ -188,7 +188,7 @@ def getFamilyInfo():
 
     resp = {}
     resp['name'] = family.name
-    resp['token'] = family_token
+    resp['family_token'] = family_token
 
     names = []
     for member in family.members:
@@ -251,7 +251,7 @@ def switchFamily():
     # retrieve user from database
     user_ref = db.collection(u'users').document(uid)
 
-    new_family_token = data['family']
+    new_family_token = data['family_token']
 
     user_ref.set({"currentfamily": new_family_token}, merge=True)
     return str(data)
