@@ -286,4 +286,11 @@ def leaveFamily():
     batch.set(user_ref, user.to_dict())
 
     batch.commit()
+
+    if len(family.members == 0):
+        for item in family.items:
+            item_ref = db.collection(u'items').document(item)
+            item_ref.delete()
+        family_ref.delete()
+
     return str(family.to_dict())
