@@ -31,6 +31,7 @@ from objectify.schemas.item import Item
 
 import firebase_admin
 from firebase_admin import auth
+import secrets
 ################################################
 
 
@@ -143,16 +144,9 @@ def getItemRef():
 
     _, user = getUserFromRequest(request)
 
-    current_family = user.currentfamily
-    family_ref = db.collection(u'families').document(current_family)
+    item_id = secrets.token_urlsafe(16)
 
-    # construct the family object
-    family = Family.from_dict(family_ref.get().to_dict())
-
-    num_items = len(family.items)
-    family_token = family.token
-
-    resp = {family_token: num_items}
+    resp = {"item_id": item_id}
 
     return str(resp)
 
@@ -201,9 +195,30 @@ def getItemInfo():
 @item_bp.route("/item/transfer/", methods=["POST"])
 def transferItem():
     data = request.get_json()
-    item_id = data['item_token']
+    item_token = data['item_token']
     _, user = getUserFromRequest(request)
 
     item_token = data['item_token']
-    old_family =
-    new_family = family
+    item_ref = db.collection(u"items").document(item_token)
+    old_family_ref = db.collection(
+        u"families").document(user.currentfamily)
+    new_family_ref = db.collection(u"families").document(data["family_token"])
+
+    old_family = Family.from_dict(old_family_ref.get().to_dict())
+    new_family = Family.from_dict(new_family_ref.get().to_dict())
+    item = Item.from_dict(item_ref.get().to_dict())
+
+    item.visibility = ["global"]
+
+    old_family.items.remove(item_token)
+    new_family.items.append(item_token)
+
+    batch = db.batch()
+
+    batch.set(item_ref, item.to_dict())
+    batch.set(old_family_ref, old_family.to_dict())
+    batch.set(new_family_ref, new_family.to_dict())
+
+    batch.commit()
+
+    return str(item.to_dict())

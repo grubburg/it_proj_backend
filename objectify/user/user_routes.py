@@ -103,6 +103,32 @@ def getAllFamilies():
     return str(family_dict)
 
 
+@user_bp.route("/user/info/families/other/")
+def getAllOtherFamilies():
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+
+    user_ref = db.collection(u'users').document(uid)
+
+    user = User.from_dict(user_ref.get().to_dict())
+
+    family_token_list = list(user.families)
+
+    current_family = user.currentfamily
+
+    family_token_list.remove(current_family)
+
+    family_dict = {}
+
+    for token in family_token_list:
+        family_ref = db.collection(u'families').document(token)
+
+        family_dict[token] = family_ref.get().to_dict()
+
+    return str(family_dict)
+
+
 @user_bp.route("/user/delete/")
 def deleteUser():
     id_token = request.headers['Authorization'].split(' ').pop()
