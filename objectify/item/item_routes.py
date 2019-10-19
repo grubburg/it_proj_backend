@@ -196,3 +196,14 @@ def getItemInfo():
     item = Item.from_dict(item_ref.get().to_dict())
 
     return str(item.to_dict())
+
+
+@item_bp.route("/item/transfer/", methods=["POST"])
+def transferItem():
+    data = request.get_json()
+    item_id = data['item_token']
+    _, user = getUserFromRequest(request)
+
+    item_token = data['item_token']
+    old_family =
+    new_family = family

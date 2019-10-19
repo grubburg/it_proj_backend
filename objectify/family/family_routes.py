@@ -255,3 +255,35 @@ def switchFamily():
 
     user_ref.set({"currentfamily": new_family_token}, merge=True)
     return str(data)
+
+
+@family_bp.route("/family/leave/", methods=['POST'])
+def leaveFamily():
+
+    data = request.get_json()
+    id_token = request.headers['Authorization'].split(' ').pop()
+    decoded_token = auth.verify_id_token(id_token)
+    uid = decoded_token['uid']
+
+    user_ref = db.collection(u'users').document(uid)
+
+    user = User.from_dict(user_ref.get().to_dict())
+
+    family_token = data['family_token']
+
+    family_ref = db.collection(u'families').document(family_token)
+    family = Family.from_dict(family_ref.get().to_dict())
+    family.members.remove(uid)
+
+    user.families.remove(family_token)
+
+    if user.currentfamily == family_token:
+        user.currentfamily = user.families[0]
+
+    batch = db.batch()
+
+    batch.set(family_ref, family.to_dict())
+    batch.set(user_ref, user.to_dict())
+
+    batch.commit()
+    return str(family.to_dict())
