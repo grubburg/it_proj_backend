@@ -53,10 +53,15 @@ def signUp():
     uid = decoded_token['uid']
 
     # ad an empty list of items to the user object
-    data['items'] = []
+    # data['items'] = []
 
     # remove the token from the user object
     user = User(data['name'], data['email'])
+    dp_status = data['image']
+
+    if dp_status == "true":
+        user.image = "true"
+
     # add the user to the db, index by their UID
     db.collection(u'users').document(uid).set(user.to_dict())
 
