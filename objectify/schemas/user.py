@@ -1,5 +1,5 @@
 class User(object):
-    def __init__(self, name, image="false", email, currentfamily="", families=[]):
+    def __init__(self, name, email, image="false", currentfamily="", families=[]):
         self.name = name
         self.image = image
         self.email = email
@@ -8,7 +8,7 @@ class User(object):
 
     @staticmethod
     def from_dict(source):
-        user = User(source[u'name'], source[u'email'],
+        user = User(source[u'name'], source[u'image'], source[u'email'],
                     source[u'currentfamily'], source[u'families'])
 
         return user
@@ -27,5 +27,5 @@ class User(object):
     def __repr__(self):
         return(
             u'User(name={}, image={}, email={}, currentfamily={}, families={})'.format(
-                self.name, self.image self.email, self.currentfamily, self.families)
+                self.name, self.image, self.email, self.currentfamily, self.families)
         )
