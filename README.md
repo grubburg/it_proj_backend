@@ -37,3 +37,7 @@ app.py
 ## Frontend
 Android app
 Link to repo: https://github.com/asilmian/It_proj_android
+
+## Project Management
+All documents and diagrams can be found on airtable:
+https://airtable.com/invite/l?inviteId=invMn1qw2lDtOzSdv&inviteToken=ef53b286d96c363ae52ed16e8f86e639d962a4d07633ee5337923afb012b418e
